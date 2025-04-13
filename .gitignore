@@ -2,12 +2,6 @@
 venv/
 env/
 
-# Archivos específicos de Windows
-*.exe
-*.dll
-*.bat
-*.cmd
-
 # Archivos específicos de Unix/Linux
 *.sh~
 
