@@ -10,3 +10,6 @@ env/
 
 # Archivos específicos de Unix/Linux
 *.sh~
+
+# Archivos de editor
+.vscode/
