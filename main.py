@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from DataBase import JsonDataBase
+from fastapi import FastAPI, Response, status, HTTPException
+from DataBase import JsonDataBase, UnknownIndexException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -15,7 +15,7 @@ class Task(BaseModel):
 def root():
     return {"message": "Hello world"}
 
-@app.post("/tasks")
+@app.post("/tasks", status_code=status.HTTP_201_CREATED)
 def post_task(task:Task):
     db.add(task.description)
     return {"response": f"new task '{task.description}' added", "status": 200}
@@ -27,5 +27,18 @@ def get_tasks():
 
 @app.get("/tasks/{id}")
 def get_task(id:int):
-    task = db.getItem(id)
-    return {"data":task}
+    try:
+        task = db.getItem(id)   
+        return {"task":task}
+    except UnknownIndexException:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
+                            , detail=f"Task with id:{id} not found")
+        
+@app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(id:int):
+    try:
+        db.removeItem(id)   
+    except UnknownIndexException:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
+                            , detail=f"Task with id:{id} not found")
+    
