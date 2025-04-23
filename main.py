@@ -67,9 +67,14 @@ def delete_task(id:int):
     
 @app.patch("/tasks/{id}", status_code=status.HTTP_200_OK)
 def update_task(id, task:Task):
-    try:
-        db.updateFromObject(id, task)
-    except UnknownIndexException:
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""UPDATE tasks SET description = %s, status = %s WHERE task_id = %s RETURNING *;""", (task.description, task.status, str(id)))
+            patched_task = cursor.fetchone()
+            column_names = [desc[0] for desc in cursor.description]
+    if patched_task == None:        
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"Task with id:{id} not found")
+    patched_task = dict(zip(column_names, patched_task))
+    return {"data":patched_task}
     
