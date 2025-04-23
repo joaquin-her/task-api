@@ -2,6 +2,9 @@
 venv/
 env/
 
+# Credenciales
+config.ini
+
 # Archivos específicos de Unix/Linux
 *.sh~
 

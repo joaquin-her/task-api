@@ -1,6 +1,11 @@
 from fastapi import FastAPI, Response, status, HTTPException
-from DataBase import JsonDataBase, UnknownIndexException
 from pydantic import BaseModel
+import psycopg
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+DATABASE_URL = config['database']['DATABASE_URL']
 
 app = FastAPI()
 db = JsonDataBase("tasks.json")
