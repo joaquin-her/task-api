@@ -37,7 +37,9 @@ def get_tasks():
         with conn.cursor() as cursor:
             cursor.execute("""SELECT * FROM tasks ORDER BY task_id ASC LIMIT 100;""")
             tasks = cursor.fetchall()
-            return {"tasks":tasks} 
+            column_names = [desc[0] for desc in cursor.description]
+            result = [dict(zip(column_names, row)) for row in tasks]
+            return {"tasks":result} 
         return {"response": "failed to get tasks", "status": 500}
 
 @app.get("/tasks/{id}")
@@ -46,10 +48,12 @@ def get_task(id:int):
         with conn.cursor() as cursor:
             cursor.execute("""SELECT * FROM tasks WHERE task_id = %s ;""", (str(id),))
             requested_task = cursor.fetchone()
+            column_names = [desc[0] for desc in cursor.description]
     if requested_task == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"Task with id:{id} not found")
-    return {"data": requested_task}
+    result = dict(zip(column_names, requested_task))            
+    return {"data": result}
         
 @app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(id:int):
