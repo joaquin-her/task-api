@@ -102,6 +102,15 @@ class JsonDataBase(IDataBase):
                 self.saveData()
             except (UnknownStatusException, UnknownFieldException, TypeError) :
                 raise ModificationError
+        raise UnknownIndexException
+
+    def updateFromObject(self, index:int, task:Task ):
+        if (self.exists(index)):
+            requestedTask = self.getItem(index)
+            updatedTask = Task.fromDict(requestedTask)
+            updatedTask.patch(task)
+            self.saveTask(index, updatedTask)
+            self.saveData()
 
 
     def saveTask(self, index:int, task:Task):

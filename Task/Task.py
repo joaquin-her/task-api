@@ -42,7 +42,13 @@ class Task(object):
 			if hasattr(task, key):
 				setattr(task, key, value)
 		return task
-	
+
+	def patch(self, task ):
+		if (task.description != self.description):
+			self.setDescription(task.description)
+		if (task.status != self.status):
+			self.setStatus(task.status)
+			
 	def update(self, field:str, value:str):
 		if (field == "description"):
 			self.setDescription(value)

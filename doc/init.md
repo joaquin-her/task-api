@@ -17,3 +17,8 @@ Windows
 ```bat
 uvicorn.exe main:app
 ```
+
+or
+```bash
+fastapi dev main.py
+```

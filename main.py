@@ -12,7 +12,7 @@ class Task(BaseModel):
         return f"description: {self.description}, status: {self.description}"
 
 @app.get("/")
-def root():
+def get_hello_world():
     return {"message": "Hello world"}
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED)
@@ -38,6 +38,14 @@ def get_task(id:int):
 def delete_task(id:int):
     try:
         db.removeItem(id)   
+    except UnknownIndexException:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
+                            , detail=f"Task with id:{id} not found")
+    
+@app.patch("/tasks/{id}", status_code=status.HTTP_200_OK)
+def update_task(id, task:Task):
+    try:
+        db.updateFromObject(id, task)
     except UnknownIndexException:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"Task with id:{id} not found")
