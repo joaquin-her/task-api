@@ -33,8 +33,13 @@ def post_task(task:Task):
 
 @app.get("/tasks")
 def get_tasks():
-    tasks = db.getItems()
-    return tasks 
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""SELECT * FROM tasks ORDER BY task_id ASC LIMIT 100;""")
+            tasks = cursor.fetchall()
+            return {"tasks":tasks} 
+        return {"response": "failed to get tasks", "status": 500}
+
 
 @app.get("/tasks/{id}")
 def get_task(id:int):
