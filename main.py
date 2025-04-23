@@ -57,9 +57,11 @@ def get_task(id:int):
         
 @app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(id:int):
-    try:
-        db.removeItem(id)   
-    except UnknownIndexException:
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""DELETE FROM tasks WHERE task_id = %s RETURNING *;""", (str(id),))
+            deleted_task = cursor.fetchone()
+    if deleted_task == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"Task with id:{id} not found")
     
