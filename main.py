@@ -8,7 +8,6 @@ config.read('config.ini')
 DATABASE_URL = config['database']['DATABASE_URL']
 
 app = FastAPI()
-db = JsonDataBase("tasks.json")
 
 class Task(BaseModel):
     description:str
@@ -18,12 +17,19 @@ class Task(BaseModel):
 
 @app.get("/")
 def get_hello_world():
-    return {"message": "Hello world"}
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            return {"message": "Hello world", "database-status":"Succesfull connection"}
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED)
 def post_task(task:Task):
-    db.add(task.description)
-    return {"response": f"new task '{task.description}' added", "status": 200}
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""INSERT INTO tasks (description) VALUES (%s) RETURNING *;""", (task.description,))
+            added_task = cursor.fetchone()
+            conn.commit()
+            return {"response": f"new task '{added_task}' added", "status": 200}
+    return {"response": f"new task '{task.description}' failed to add", "status": 500}
 
 @app.get("/tasks")
 def get_tasks():
