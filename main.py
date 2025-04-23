@@ -40,15 +40,16 @@ def get_tasks():
             return {"tasks":tasks} 
         return {"response": "failed to get tasks", "status": 500}
 
-
 @app.get("/tasks/{id}")
 def get_task(id:int):
-    try:
-        task = db.getItem(id)   
-        return {"task":task}
-    except UnknownIndexException:
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""SELECT * FROM tasks WHERE task_id = %s ;""", (str(id),))
+            requested_task = cursor.fetchone()
+    if requested_task == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"Task with id:{id} not found")
+    return {"data": requested_task}
         
 @app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(id:int):
