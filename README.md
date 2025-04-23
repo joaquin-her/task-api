@@ -45,6 +45,7 @@ fastapi run
 ## Usage
 
 Access the API at `http://localhost:8000`
+
 Access API Documentation at `http://localhost:8000/docs`
 
 ## Contributing
